@@ -1,0 +1,66 @@
+diff --git a/boost/coroutine/asymmetric_coroutine.hpp b/boost/coroutine/asymmetric_coroutine.hpp
+index 38ad3ab..08e271c 100644
+--- a/boost/coroutine/asymmetric_coroutine.hpp
++++ b/boost/coroutine/asymmetric_coroutine.hpp
+@@ -341,7 +341,7 @@ private:
+     { BOOST_ASSERT( impl_); }
+ 
+ public:
+-    push_coroutine() BOOST_NOEXCEPT :
++    inline push_coroutine() BOOST_NOEXCEPT :
+         impl_( 0)
+     {}
+ 
+@@ -349,8 +349,8 @@ public:
+ # ifdef BOOST_MSVC
+     typedef void ( * coroutine_fn)( pull_coroutine< void > &);
+ 
+-    explicit push_coroutine( coroutine_fn,
+-                             attributes const& = attributes() );
++    inline explicit push_coroutine( coroutine_fn,
++                                    attributes const& = attributes() );
+ 
+     template< typename StackAllocator >
+     explicit push_coroutine( coroutine_fn,
+@@ -394,11 +394,11 @@ public:
+         }
+     }
+ 
+-    push_coroutine( BOOST_RV_REF( push_coroutine) other) BOOST_NOEXCEPT :
++    inline push_coroutine( BOOST_RV_REF( push_coroutine) other) BOOST_NOEXCEPT :
+         impl_( 0)
+     { swap( other); }
+ 
+-    push_coroutine & operator=( BOOST_RV_REF( push_coroutine) other) BOOST_NOEXCEPT
++    inline push_coroutine & operator=( BOOST_RV_REF( push_coroutine) other) BOOST_NOEXCEPT
+     {
+         push_coroutine tmp( boost::move( other) );
+         swap( tmp);
+@@ -407,13 +407,13 @@ public:
+ 
+     BOOST_EXPLICIT_OPERATOR_BOOL();
+ 
+-    bool operator!() const BOOST_NOEXCEPT
++    inline bool operator!() const BOOST_NOEXCEPT
+     { return 0 == impl_ || impl_->is_complete(); }
+ 
+-    void swap( push_coroutine & other) BOOST_NOEXCEPT
++    inline void swap( push_coroutine & other) BOOST_NOEXCEPT
+     { std::swap( impl_, other.impl_); }
+ 
+-    push_coroutine & operator()()
++    inline push_coroutine & operator()()
+     {
+         BOOST_ASSERT( * this);
+ 
+@@ -1609,8 +1609,8 @@ push_coroutine< Arg & >::push_coroutine( coroutine_fn fn,
+     BOOST_ASSERT( impl_);
+ }
+ 
+-push_coroutine< void >::push_coroutine( coroutine_fn fn,
+-                                        attributes const& attrs) :
++inline push_coroutine< void >::push_coroutine( coroutine_fn fn,
++                                               attributes const& attrs) :
+     impl_( 0)
+ {
+     // create a stack-context

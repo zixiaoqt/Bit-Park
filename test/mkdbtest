@@ -1,0 +1,2 @@
+#!/bin/sh
+mysqldump -h192.168.1.86 -uivmpuser -pheadway2013 parkdb | mysql -h192.168.1.86 -uivmpuser -pheadway2013 parkdbtest

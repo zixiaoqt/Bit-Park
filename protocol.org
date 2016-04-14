@@ -1,0 +1,468 @@
+* 中心与客户端协议
+  ErrorCode这个字段是可选的，即使有错误，如果这个错误不是软件内部错误，而是其它异常，则没有错误码，只有错误信息ErrorInfo
+  ErrorCode和ErrorInfo只有在Result是ERROR时才出现
+
+  协议是以json组织的
+** 登录
+*** 请求
+    {
+    "CmdType":"Login",
+    "User": "用户",
+    "Password":"密码"
+    }
+*** 响应
+    {
+    "CmdType":"LoginResponse",
+    "Result": "OK"或者"ERROR",
+    "ErrorCode":错误码,可选
+    "ErrorInfo":"错误信息，如果Result为OK，则无此项"
+    }
+
+** 注销
+*** 请求
+    {
+    "CmdType":"Logout",
+    }
+*** 响应
+    {
+    "CmdType":"LogoutResponse",
+    "Result": "OK"或者"ERROR",
+    "ErrorCode":错误码,可选
+    "ErrorInfo":"错误信息，如果Result为OK，则无此项"
+    }
+
+** 交接班
+*** 请求
+    {
+    "CmdType":"Shift",
+    "CurrentUser": "当前用户",
+    "CurrentPassword":"当前密码",
+    "NextUser": "下一个用户",
+    "NextPassword":"下一个用户密码"
+    }
+*** 响应
+    {
+    "CmdType":"ShiftResponse",
+    "Result": "OK"或者"ERROR",
+    "ErrorCode":错误码,可选
+    "ErrorInfo":"错误信息，如果Result为OK，则无此项"
+    }
+
+** 查询出入口
+*** 请求
+    {
+    "CmdType":"QueryGateway",
+    }
+*** 响应
+    {
+    "CmdType":"QueryGatewayReponse",
+    "Result": "OK"或者"ERROR",
+    "ErrorCode":错误码,可选
+    "ErrorInfo":"错误信息，如果Result为OK，则无此项"
+    "List":{
+           "ID":"出入口ID",
+           "Name":"出入口名称",
+           "Type":"出入口类型",
+           "Park":"停车场"
+           }
+    }
+** 查询设备
+*** 请求
+    {
+    "CmdType":"QueryDevice",
+    }
+*** 响应
+    {
+    "CmdType":"QueryDeviceReponse",
+    "Result": "OK"或者"ERROR",
+    "ErrorCode":错误码,可选
+    "ErrorInfo":"错误信息，如果Result为OK，则无此项"
+    "List":{
+           "ID":"设备ID",
+           "Name":"设备名称",
+           "Gateway":"设备所属出入口",
+           "Type":"设备类型",
+           "IP":"设备IP",
+           "Port":"设备端口"
+           }
+    }
+** 客户端绑定设备
+*** 通知
+    {
+    "CmdType":"BindDevice",
+    "PassDirection":"方向 9入  10出”,
+    "DeviceID":"设备编号"
+    }
+*** 响应
+    {
+    "CmdType":"BindDeviceResponse",
+    "Result": "OK"或者"ERROR",
+    "ErrorCode":错误码,可选
+    "ErrorInfo":"错误信息，如果Result为OK，则无此项"
+    }
+** 设备控制
+*** 通知
+    {
+    "CmdType":"OperateDevcie",
+    "PassDirection":"方向 9入  10出”,
+    "DeviceID":"设备编号",
+    "Charge": "收费, float,如果是出口，包含此字段，否则不包含"，
+    "PlateNumber":"车牌号"
+    "OpenGate": 是否开闸 0:不开闸 1:开闸
+    }
+*** 响应
+    {
+    "CmdType":"OperateDeviceResponse",
+    "Result": "OK"或者"ERROR",
+    "ErrorCode":错误码,可选
+    "ErrorInfo":"错误信息，如果Result为OK，则无此项"
+    }
+** 道闸控制
+*** 请求
+     {
+     "CmdType":"OperateGateway",
+     "DeviceID": "设备ID",
+     "PassID":"出口纪录ID"，
+     "ActionType":操作类型, 0: 无操作 1: 道闸升起 2: 道闸降下 3: 道闸停止 4: 道闸常开 5: 道闸常闭
+     }
+*** 响应
+    {
+    "CmdType":"OperateGatewayResponse",
+    "Result": "OK"或者"ERROR",
+    "ErrorCode":错误码,可选
+    "ErrorInfo":"错误信息，如果Result为OK，则无此项"
+    }
+
+** 查询场内车辆
+*** 请求
+    {
+     "CmdType":"QueryParkingVehicle",
+     "StartTime":"格式2014-03-25 16:02:30,可选",
+     "EndTime":"格式2014-03-25 16:02:30,可选"，
+     "VehicleColor":"车身颜色，可选, 参见《比特出入口设备接入第三方平台技术方案》附录七",
+     "PlateNumber":"车牌号，可选, 模糊查询",
+     "ParkingType":"停车类型  1：白名单车辆、2：储值车辆、3：包月车辆、4：特殊车辆   5：临时车"
+     }
+*** 响应
+     {
+     "CmdType":"QueryParkingVehicleResponse",
+     "Result": "OK或者ERROR, 如果ERROR，则无下面的信息",
+    "ErrorCode":错误码,可选
+    "ErrorInfo":"错误信息，如果Result为OK，则无此项"
+     "EnterVehicleList":
+         {
+         "PassID":"通行记录ID",
+         "PlateType":"车牌类型",
+         "PlateNumber1":"车牌号",
+         "PlateNumber2":"车牌号（辅）",
+         "DeviceID":"设备编号",
+         "PassDirection":方向 9入  10出,
+         "PictureURL1":"图片URL",
+         "PictureURL2":"图片URL",
+         "PlateColor":车牌颜色,
+         "VehicleColor":车身颜色，可选,
+         "VehicleType":车辆类型，可选,
+         "VehicleSubType":"车辆子类型，可选",
+         "PassTime":"过车时间"
+         "PlatePosition":车牌位置，json数组 [1,1,1,1] [left,top,width,height]
+         }
+     }
+
+** 修正车牌
+*** 请求
+    {
+     "CmdType":"RevisePlate",
+     "PassID":"通行记录ID",
+     "PlateNumber":"车牌号",
+     }
+*** 响应
+    {
+    "CmdType":"RevisePlateResponse",
+    "Result": "OK或者ERROR",
+    "ErrorCode":错误码,可选
+    "ErrorInfo":"错误信息，如果Result为OK，则无此项"
+    }
+
+** 匹配车牌
+*** 请求
+    {
+     "CmdType":"MatchPlate",
+     "EnterID":"入口记录ID",
+     "ExitID":"出口记录ID",
+     }
+*** 响应
+    {
+    "CmdType":"MatchPlateResponse",
+    "Result": "OK或者ERROR, 如果ERROR，则无下面的信息",
+    "ErrorCode":错误码,可选
+    "ErrorInfo":"错误信息，如果Result为OK，则无此项"
+     "ParkingType"："停车类型  1：白名单车辆、2：储值车辆、3：包月车辆、4：特殊车辆   5：临时车"
+     "TotalCharge": "应收费, float"
+     "RequireCharge": "需收费, float"
+     "ChargeID":"收费ID",
+     "Bill":  帐单
+         {
+         "EnterTime":"进入时间",
+         "ExitTime":"出去时间",
+         "Duration":停留在停车场时间,
+         "FreeDuration":免费时间,
+         "BeforeDiscountedFee":折前总费用,
+         "TotalFee":总费用,
+         "Discount":折扣率,
+         "List":
+               {
+               "BeginTime":"开始时间",
+               "EndTime":"结束时间",
+               "Duration":时间段,
+               "UnbilledDuration":未入帐时间,
+               "FreeDuration":免费时间,
+               "Fee":这一时段费用,
+               }
+         }
+    }
+
+** 收款结帐
+*** 请求
+     {
+     "CmdType":"Checkout",
+     "EnterID":"入口记录ID",
+     "ExitID":"出口记录ID",
+     "Charge":应收费, float,
+     "ActualCharge":实际收费,float，
+     "PayType":支付方式：1现金、2支付宝、3微信、4银联支付、5储值扣费、6其他,
+     "ParkingType"：停车类型  0: 特殊车辆 1：白名单车辆、2：储值车辆、3：包月车辆、4：临时或短期会员 8: 出租车 9：临时车
+     "ExitType":离场类型 1自动放行、2人工收费放行、3特殊车辆放行、4免费放行、5凭证放行
+     "ExitComment":"放行备注"
+     "ChargeID":"收费ID",
+     "Bill": 帐单
+         {
+         "EnterTime":"进入时间",
+         "ExitTime":"出去时间",
+         "Duration":停留在停车场时间,
+         "FreeDuration":免费时间,
+         "BeforeDiscountedFee":折前总费用,
+         "TotalFee":总费用,
+         "FeeExemption":减免费用,可选
+         "Discount":折扣率,
+         "List":
+               {
+               "BeginTime":"开始时间",
+               "EndTime":"结束时间",
+               "Duration":时间段,
+               "UnbilledDuration":未入帐时间,
+               "FreeDuration":免费时间,
+               "Fee":这一时段费用,
+               "RuleID":计费规则ID
+               }
+         }
+     }
+*** 响应
+    {
+    "CmdType":"CheckoutResponse",
+    "Result": "OK"或者"ERROR",
+    "ErrorCode":错误码,可选
+    "ErrorInfo":"错误信息，如果Result为OK，则无此项"
+    }
+
+# ** 上传票据凭证（使用http,依据《比特出入口设备接入第三方平台技术方案》中http负载文本和二进制格式说明）
+# *** 请求
+#     {
+#     "CmdType":"UploadVoucherPicture",
+#     "BillID":"账单ID",
+#     }
+
+# *** 响应
+#     201 表示成功，其他返回值根据http协议定义
+
+** 上传票据凭证（使用websocket的binary格式传输）
+*** 请求
+    二进制格式
+    前32位为收费ID（出口过车通知或者匹配车牌响应中的"ChargeID"）,
+    接着5位是文件格式，不够5位补0,
+    后面接实际数据
+
+*** 响应
+    无
+
+** 查询总车位数和剩余车位
+*** 请求
+    {
+     "CmdType":"QueryParkingNumber",
+    }
+*** 响应
+    {
+    "CmdType":"QueryParkingNumberResponse",
+    "TotalParkingNumber":总车位数,
+    "RemainParkingNumber":剩余车位数
+    "Result": "OK"或者"ERROR",
+    "ErrorCode":错误码,可选
+    "ErrorInfo":"错误信息，如果Result为OK，则无此项"
+    }
+
+** 锁定设备
+*** 通知
+    {
+    "CmdType":"LockDevice",
+    "DeviceID":"设备编号"
+    }
+*** 响应
+    {
+    "CmdType":"LockDeviceResponse",
+    "Result": "OK"或者"ERROR",
+    "ErrorCode":错误码,可选
+    "ErrorInfo":"错误信息，如果Result为OK，则无此项"
+    }
+** 修正剩余车位数(作废)
+*** 请求
+    {
+     "CmdType":"ReviseRemainParkingNumber",
+     "RemainParkingNumber":剩余车位数
+    }
+*** 响应
+    {
+    "CmdType":"ReviseRemainParkingNumberResponse",
+    "Result": "OK"或者"ERROR",
+    "ErrorCode":错误码,可选
+    "ErrorInfo":"错误信息，如果Result为OK，则无此项"
+    }
+
+** 入口过车通知
+*** 通知
+    {
+    "CmdType":"EnterVehicleNotify",
+    "PassID":"通行记录ID",
+    "PlateType":"车牌类型",
+    "PlateNumber1":"车牌号",
+    "PlateNumber2":"车牌号（辅）",
+    "DeviceID":"设备编号",
+    "PassDirection":"方向 9入  10出”,
+    "PictureURL1":"图片URL",
+    "PictureURL2":"图片URL",
+    "PlateColor":"车牌颜色",
+    "VehicleColor":"车身颜色，可选",
+    "VehicleType":"车辆类型，可选",
+    "VehicleSubType":"车辆子类型，可选",
+    "PassTime":"过车时间"
+    "PlatePosition":车牌位置，json数组 [1,1,1,1] [left,top,width,height]
+    "OpenGate": 是否开闸 0:不开闸 1:开闸， 如果没有此字段，不需要客户端发送OperateDevcie指令
+    }
+
+** 出口过车通知
+*** 通知
+    {
+    "CmdType":"ExitVehicleNotify",
+    "ExitVehicle":
+         {
+         "PassID":"通行记录ID",
+         "PlateType":"车牌类型",
+         "PlateNumber1":"车牌号",
+         "PlateNumber2":"车牌号（辅）",
+         "DeviceID":"设备编号",
+         "PassDirection":"方向 9入  10出”,
+         "PictureURL1":"图片URL",
+         "PictureURL2":"图片URL",
+         "PlateColor":"车牌颜色",
+         "VehicleColor":"车身颜色，可选",
+         "VehicleType":"车辆类型，可选",
+         "VehicleSubType":"车辆子类型，可选",
+         "PassTime":"过车时间"，
+         "PlatePosition":车牌位置，json数组 [1,1,1,1] [left,top,width,height]，
+         }
+     "EnterVehicle":
+         {
+         "PassID":"通行记录ID",
+         "PlateType":"车牌类型",
+         "PlateNumber1":"车牌号",
+         "PlateNumber2":"车牌号（辅）",
+         "DeviceID":"设备编号",
+         "PassDirection":"方向 9入  10出”,
+         "PictureURL1":"图片URL",
+         "PictureURL2":"图片URL",
+         "PlateColor":"车牌颜色",
+         "VehicleColor":"车身颜色，可选",
+         "VehicleType":"车辆类型，可选",
+         "VehicleSubType":"车辆子类型，可选",
+         "PassTime":"过车时间"
+         "PlatePosition":车牌位置，json数组 [1,1,1,1] [left,top,width,height]
+         }
+     "ParkingType"：停车类型 0: 特殊车辆 1：白名单车辆、2：储值车辆、3：包月车辆、4：临时或短期会员 8: 出租车 9：临时车
+     "TotalCharge": "应收费, float"
+     "RequireCharge": "需收费, float"
+     "ChargeID":"收费ID",
+     "OpenGate": 是否开闸 0:不开闸 1:开闸
+     "Bill":  帐单
+         {
+         "EnterTime":"进入时间",
+         "ExitTime":"出去时间",
+         "Duration":停留在停车场时间,
+         "FreeDuration":免费时间,
+         "BeforeDiscountedFee":折前总费用,
+         "TotalFee":总费用,
+         "FeeExemption":减免费用,可选,
+         "Discount":折扣率,
+         "List":
+               {
+               "BeginTime":"开始时间",
+               "EndTime":"结束时间",
+               "Duration":时间段,
+               "UnbilledDuration":未入帐时间,可选
+               "FreeDuration":免费时间,可选
+               "Fee":这一时段费用,
+               "RuleID":计费规则ID
+               }
+         }
+     }
+
+** 记录收费员ESC操作记录
+*** 请求
+    {
+     "CmdType":"EscRecord",
+     "LeaveNid" : 驶离记录,
+     "MatchNids" : 配对记录，数组
+     "CaclFee" : 计算费用，模糊不走计算，为0就可以
+     "Time" : 操作时间, 格式2014-03-25 16:02:30
+     }
+*** 响应
+    {
+    "CmdType":"EscRecordResponse",
+    "Result": "OK"或者"ERROR",
+    "ErrorCode":错误码,可选
+    "ErrorInfo":"错误信息，如果Result为OK，则无此项"
+    }
+
+
+** 规则
+*** 客户端发送OperateDevice时机
+**** 入口
+如果消息中含有"OpenGate"字段，则需要客户端向中心发送"OperateDevice"指令。
+***** 设计原因
+如果入口的道闸控制和LED显示也是由客户端来发起，会出现客户端无人操作或者忙于其它任务时，会阻塞入口的开闸。
+现有的处理策略是如果是有效白名单或者全部放行或者出租车，由中心发起开闸和LED操作。其它的情况发给客户端，由客户端控制。
+
+**** 出口
+如果消息中含有"EnterVehicle"或者"RequireCharge"字段，字段，则需要客户端向中心发送"OperateDevice"指令。
+***** 设计原因
+如果消息中含有"EnterVehicle"，说明出口车匹配到了入口车；如果消息中含有"RequireCharge"，说明费用已经计算出来了。
+为什么需要这两个字段去判断呢？
+1. 当放行模式是收费放行时
+如果没有匹配到入口车，就不会有费用，此时EnterVehicle和RequireCharge都不会存在；
+如果匹配到入口车，此时EnterVehicle和RequireCharge都存在。
+2. 当放行模式是白名单放行或者全部放行或者出租车放行时
+如果没有匹配到入口车，此时没有EnterVehicle，但有RequireCharge，而且为0；
+如果匹配到入口车，此时EnterVehicle和RequireCharge都存在，RequireCharge为0。
+
+总之，当客户端需要手工匹配时，才不需要发送"OperateDevice"指令。
+
+*** 撤销机制
+**** 入口
+如果接到过车方向是出，说明车要退出，此时删除场内表中过车数据，并显示车牌，不通知客户端。
+**** 出口
+如果接到过车方向是入，说明车要回到停车场，如果有收费记录，则删除收费记录；恢复场内表中入车数据；通知入口显示剩余车位；不通知客户端。
+**** 客户端
+如果客户端进入收费业务时，需要取消，不需要向中心发送任何消息。
+
+*** 非机动车特殊处理
+**** 入口
+在数据库中存过车信息，在磁盘上存储图片，删除场内表中过车数据，不通知客户端。
+**** 出口
+在数据库中存过车信息，在磁盘上存储图片，不通知客户端。

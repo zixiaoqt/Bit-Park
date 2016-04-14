@@ -1,0 +1,12 @@
+[submodule "spdlog"]
+	path = spdlog
+	url = https://github.com/gabime/spdlog.git
+[submodule "websocketpp"]
+	path = websocketpp
+	url = https://github.com/zaphoyd/websocketpp.git
+[submodule "jsoncpp"]
+	path = jsoncpp
+	url = https://github.com/open-source-parsers/jsoncpp.git
+[submodule "Boost.Application"]
+	path = Boost.Application
+	url = https://github.com/retf/Boost.Application.git

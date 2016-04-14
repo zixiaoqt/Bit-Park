@@ -1,0 +1,11 @@
+log_level=0
+db_server=192.168.1.192
+db_name=parkdb
+
+db_user=root
+db_password=Bitcom777
+db_idle_time=30
+
+server_ip=192.168.1.192
+pic_path=d:\\park_server_picture\\passvehicle
+voucher_pic_path=d:\\park_server_picture\\voucher
